@@ -159,6 +159,7 @@ break;
 if(stringComplete){
     inputString.trim();
     if (inputString == "FETCH") {
+      state = 1;
       Serial.print("DATA#");
       Serial.println(lux);
     }
