@@ -8,8 +8,8 @@
 
 GPS neo7m use software serial on pin 3 (RX) and 2 (TX)
 
-- green on pin 2
-- yellow on pin 3
+- green on pin 3
+- yellow on pin 2
 - 9600 bps
 
 ## Serial communication
