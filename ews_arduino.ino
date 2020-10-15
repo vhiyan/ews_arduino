@@ -15,7 +15,7 @@
 #define b4 24
 #define jmlNodeid
 
-static const int RXPin = 2, TXPin = 3;
+static const int RXPin = 3, TXPin = 2; //yellow on pin 2, green on pin 3
 static const uint32_t GPSBaud = 9600;
 double longitude, latitude;
 
