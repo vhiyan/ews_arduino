@@ -154,6 +154,8 @@ void loop() {
       while (ss.available() > 0)
         if (gps.encode(ss.read()))
         {
+           if (gps.location.isValid())
+          {
           Serial.print(get_lat(), 6);
           Serial.print(" ");
           Serial.println(get_long(), 6);
@@ -166,6 +168,7 @@ void loop() {
           Serial.print("#");
           Serial.println(get_lat(), 6);
           state = 1;
+          }
         }
       break;
 
