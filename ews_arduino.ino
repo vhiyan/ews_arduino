@@ -69,7 +69,7 @@ void setup() {
 
 void loop() {
   // put your main code here, to run repeatedly:
-  //lux =read_lux();
+  lux =read_lux();
 
   char customKey = customKeypad.getKey();
   if (customKey != '\0') {
