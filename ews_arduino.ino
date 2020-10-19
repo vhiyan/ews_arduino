@@ -74,6 +74,9 @@ void loop() {
   char customKey = customKeypad.getKey();
   if (customKey != '\0') {
     if (customKey == '#' && state == 0) {
+      kirim ="";
+      kirim = (String)pass;
+      kirim.trim();
       state = 2;
       //enter
     }
@@ -142,25 +145,33 @@ void loop() {
         }
         display.setCursor(0, b3);
         display.print("long:");
-        display.println(get_long());
+        display.println(get_long(),6);
         display.setCursor(0, b4);
         display.print("lat:");
-        display.println(get_lat());
+        display.println(get_lat(),6);
         display.display();
       }
       break;
 
     case 2:
+    if (timer(0, 1000)) {
+        display.setTextSize(1);
+        display.setTextColor(WHITE);
+        display.clearDisplay();
+        display.setCursor(0, b1);
+        display.println("Menunggu");
+        display.setCursor(0, b2);
+        display.println("Pendaftaran");
+        display.display();
+    }
       while (ss.available() > 0)
         if (gps.encode(ss.read()))
         {
-           if (gps.location.isValid())
+          if (gps.location.isValid())
           {
           Serial.print(get_lat(), 6);
           Serial.print(" ");
           Serial.println(get_long(), 6);
-          kirim = (String)pass;
-          kirim.trim();
           Serial.print("DAFTAR#");
           Serial.print(kirim);
           Serial.print("#");
@@ -188,7 +199,7 @@ void loop() {
       k = 0;
       for (int i = 0 ; i < 9; i++)
       {
-        pass[i] = ' ';
+        pass[i] =' ';
       }
       state = 0;
     }
