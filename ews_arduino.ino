@@ -15,6 +15,12 @@
 #define b4 24
 #define jmlNodeid
 
+#define pinSaklarPH 5
+int statusPH = 0;
+bool kirimsekalion =  false;
+bool kirimsekalioff =  false;
+ 
+
 static const int RXPin = 3, TXPin = 2; //yellow on pin 2, green on pin 3
 static const uint32_t GPSBaud = 9600;
 double longitude, latitude;
@@ -61,16 +67,36 @@ void setup() {
   // put your setup code here, to run once:
   Serial.begin(9600);
   ss.begin(GPSBaud);
-
+  pinMode(pinSaklarPH,INPUT);
   display.begin(SSD1306_SWITCHCAPVCC, 0x3C);  // initialize with the I2C addr 0x3C (for the 128x32)
   lightMeter.begin(BH1750::ONE_TIME_HIGH_RES_MODE);
 
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
+  //main loop without delay
   lux =read_lux();
+  statusPH = digitalRead(pinSaklarPH);
+  if(statusPH == HIGH){
+    if(kirimsekalion == false)
+    { 
+    Serial.println("PHON");
+    kirimsekalion = true;
+    kirimsekalioff = false;
+    }
+  }
+  else
+  {
 
+    if(kirimsekalioff == false)
+    { 
+    Serial.println("PHOFF");
+    kirimsekalioff = true;
+    kirimsekalion = false;
+    }
+  }
+
+  //loop for keypad
   char customKey = customKeypad.getKey();
   if (customKey != '\0') {
     if (customKey == '#' && state == 0) {
@@ -111,7 +137,7 @@ void loop() {
   }
 
 
-
+//loop state
   switch (state) {
     case 0:
       if (timer(0, 500)) {
@@ -187,6 +213,7 @@ void loop() {
       break;
   }
 
+//loop read serial string
   if (stringComplete) {
     inputString.trim();
     if (inputString == "FETCH") {
