@@ -67,7 +67,10 @@ void setup() {
   // put your setup code here, to run once:
   Serial.begin(9600);
   ss.begin(GPSBaud);
-  pinMode(pinSaklarPH,INPUT);
+  while (!Serial) {
+    ;
+  }
+  pinMode(pinSaklarPH,INPUT_PULLUP);
   display.begin(SSD1306_SWITCHCAPVCC, 0x3C);  // initialize with the I2C addr 0x3C (for the 128x32)
   lightMeter.begin(BH1750::ONE_TIME_HIGH_RES_MODE);
 
@@ -77,7 +80,8 @@ void loop() {
   //main loop without delay
   lux =read_lux();
   statusPH = digitalRead(pinSaklarPH);
-  if(statusPH == HIGH){
+  if(statusPH == LOW){
+     
     if(kirimsekalion == false)
     { 
     Serial.println("PHON");
@@ -87,7 +91,6 @@ void loop() {
   }
   else
   {
-
     if(kirimsekalioff == false)
     { 
     Serial.println("PHOFF");
@@ -233,7 +236,7 @@ void loop() {
     stringComplete = false;
     inputString = "";
   }
-
+delay(20);
 }
 
 void serialEvent()
