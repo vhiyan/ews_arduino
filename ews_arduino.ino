@@ -27,7 +27,7 @@ double longitude, latitude;
 
 float lux = 0;
 
-unsigned long currentTime[2], previousTime[2];
+unsigned long currentTime[3], previousTime[3];
 
 unsigned int state = 0;
 
@@ -54,6 +54,7 @@ String kirim = "";
 String inputString = ""; // a String to hold incoming data
 bool stringComplete = false; // whether the string is complete
 
+double gpslat,gpslong;
 
 BH1750 lightMeter;
 TinyGPSPlus gps;
@@ -81,21 +82,16 @@ void loop() {
   lux =read_lux();
   statusPH = digitalRead(pinSaklarPH);
   if(statusPH == LOW){
-     
-    if(kirimsekalion == false)
+    if(timer(2,300000))
     { 
     Serial.println("PHON");
-    kirimsekalion = true;
-    kirimsekalioff = false;
     }
   }
   else
   {
-    if(kirimsekalioff == false)
+ if(timer(2,120000))
     { 
     Serial.println("PHOFF");
-    kirimsekalioff = true;
-    kirimsekalion = false;
     }
   }
 
@@ -160,7 +156,7 @@ void loop() {
       break;
     case 1:
       //
-      if (timer(0, 1000)) {
+      if (timer(0, 2000)) {
         display.setTextSize(1);
         display.setTextColor(WHITE);
         display.clearDisplay();
@@ -174,10 +170,10 @@ void loop() {
         }
         display.setCursor(0, b3);
         display.print("long:");
-        display.println(get_long(),6);
+        display.println(gpslong,6);
         display.setCursor(0, b4);
         display.print("lat:");
-        display.println(get_lat(),6);
+        display.println(gpslat,6);
         display.display();
       }
       break;
@@ -198,6 +194,9 @@ void loop() {
         {
           if (gps.location.isValid())
           {
+gpslat = get_lat();
+gpslong = get_long();
+
           Serial.print(get_lat(), 6);
           Serial.print(" ");
           Serial.println(get_long(), 6);
@@ -221,22 +220,30 @@ void loop() {
     inputString.trim();
     if (inputString == "FETCH") {
       state = 1;
+//kirimsekalion = false;
+//kirimsekalioff = false;
       Serial.print("DATA#");
       Serial.println(lux);
     }
     if (inputString == "DAFTAR") {
       Serial.println("CHANGE");
       k = 0;
+kirimsekalion= false;
+kirimsekalioff= false;
       for (int i = 0 ; i < 9; i++)
       {
         pass[i] =' ';
       }
       state = 0;
     }
+if(inputString == "CEK"){
+Serial.print("cek#");
+Serial.println(statusPH);
+}
     stringComplete = false;
     inputString = "";
   }
-delay(20);
+
 }
 
 void serialEvent()
