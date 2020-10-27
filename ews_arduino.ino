@@ -1,12 +1,13 @@
 #include <TinyGPS++.h>
 #include <SoftwareSerial.h>
 #include <BH1750.h>
-
+#include <EEPROM.h>
 #include <Wire.h>
 #include <Adafruit_GFX.h> //display
 #include <Adafruit_SSD1306.h>
 
 #include <Keypad.h>
+
 
 #define OLED_RESET 4
 #define b1 0
@@ -20,6 +21,10 @@ int statusPH = 0;
 bool kirimsekalion =  false;
 bool kirimsekalioff =  false;
 
+struct MyObject {
+  double longitude;
+  double latitude;
+};
 
 static const int RXPin = 3, TXPin = 2; //yellow on pin 2, green on pin 3
 static const uint32_t GPSBaud = 9600;
@@ -64,7 +69,10 @@ SoftwareSerial ss(RXPin, TXPin);
 Adafruit_SSD1306 display(OLED_RESET);
 
 
-
+MyObject gpsEEPROM = {
+  0,
+  0
+};
 
 void setup() {
   // put your setup code here, to run once:
@@ -73,6 +81,7 @@ void setup() {
   while (!Serial) {
     ;
   }
+
   pinMode(pinSaklarPH, INPUT_PULLUP);
   display.begin(SSD1306_SWITCHCAPVCC, 0x3C);  // initialize with the I2C addr 0x3C (for the 128x32)
   lightMeter.begin(BH1750::ONE_TIME_HIGH_RES_MODE);
@@ -113,6 +122,9 @@ void loop() {
       for (int i = 0 ; i < 9; i++)
       {
         pass[i] = ' ';
+      }
+      for (int i = 0 ; i < EEPROM.length() ; i++) {
+        EEPROM.write(i, 0);
       }
       state = 0;
     }
@@ -170,6 +182,11 @@ void loop() {
           display.setCursor(0 + (i * 8), b1);
           display.println(pass[i]);
         }
+        if (gpslong == 0 && gpslat == 0) {
+          EEPROM.get(0, gpsEEPROM);
+          gpslat = gpsEEPROM.latitude;
+          gpslong = gpsEEPROM.longitude;
+        }
         display.setCursor(0, b3);
         display.print("long:");
         display.println(gpslong, 6);
@@ -198,7 +215,11 @@ void loop() {
           {
             gpslat = get_lat();
             gpslong = get_long();
-
+            gpsEEPROM = {
+              gpslat,
+              gpslong
+            };
+            EEPROM.put(0, gpsEEPROM);
             Serial.print(get_lat(), 6);
             Serial.print(" ");
             Serial.println(get_long(), 6);
