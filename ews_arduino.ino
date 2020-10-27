@@ -19,7 +19,7 @@
 int statusPH = 0;
 bool kirimsekalion =  false;
 bool kirimsekalioff =  false;
- 
+
 
 static const int RXPin = 3, TXPin = 2; //yellow on pin 2, green on pin 3
 static const uint32_t GPSBaud = 9600;
@@ -50,11 +50,13 @@ bool adapass = false;
 char key;
 Keypad customKeypad = Keypad( makeKeymap(hexaKeys), rowPins, colPins, ROWS, COLS);
 String kirim = "";
+String token;
+String data;
 
 String inputString = ""; // a String to hold incoming data
 bool stringComplete = false; // whether the string is complete
 
-double gpslat,gpslong;
+double gpslat, gpslong;
 
 BH1750 lightMeter;
 TinyGPSPlus gps;
@@ -71,7 +73,7 @@ void setup() {
   while (!Serial) {
     ;
   }
-  pinMode(pinSaklarPH,INPUT_PULLUP);
+  pinMode(pinSaklarPH, INPUT_PULLUP);
   display.begin(SSD1306_SWITCHCAPVCC, 0x3C);  // initialize with the I2C addr 0x3C (for the 128x32)
   lightMeter.begin(BH1750::ONE_TIME_HIGH_RES_MODE);
 
@@ -79,19 +81,19 @@ void setup() {
 
 void loop() {
   //main loop without delay
-  lux =read_lux();
+  lux = read_lux();
   statusPH = digitalRead(pinSaklarPH);
-  if(statusPH == LOW){
-    if(timer(2,300000))
-    { 
-    Serial.println("PHON");
+  if (statusPH == LOW) {
+    if (timer(2, 300000))
+    {
+      Serial.println("PHON");
     }
   }
   else
   {
- if(timer(2,120000))
-    { 
-    Serial.println("PHOFF");
+    if (timer(2, 120000))
+    {
+      Serial.println("PHOFF");
     }
   }
 
@@ -99,7 +101,7 @@ void loop() {
   char customKey = customKeypad.getKey();
   if (customKey != '\0') {
     if (customKey == '#' && state == 0) {
-      kirim ="";
+      kirim = "";
       kirim = (String)pass;
       kirim.trim();
       state = 2;
@@ -136,7 +138,7 @@ void loop() {
   }
 
 
-//loop state
+  //loop state
   switch (state) {
     case 0:
       if (timer(0, 500)) {
@@ -170,16 +172,16 @@ void loop() {
         }
         display.setCursor(0, b3);
         display.print("long:");
-        display.println(gpslong,6);
+        display.println(gpslong, 6);
         display.setCursor(0, b4);
         display.print("lat:");
-        display.println(gpslat,6);
+        display.println(gpslat, 6);
         display.display();
       }
       break;
 
     case 2:
-    if (timer(0, 1000)) {
+      if (timer(0, 1000)) {
         display.setTextSize(1);
         display.setTextColor(WHITE);
         display.clearDisplay();
@@ -188,25 +190,25 @@ void loop() {
         display.setCursor(0, b2);
         display.println("Pendaftaran");
         display.display();
-    }
+      }
       while (ss.available() > 0)
         if (gps.encode(ss.read()))
         {
           if (gps.location.isValid())
           {
-gpslat = get_lat();
-gpslong = get_long();
+            gpslat = get_lat();
+            gpslong = get_long();
 
-          Serial.print(get_lat(), 6);
-          Serial.print(" ");
-          Serial.println(get_long(), 6);
-          Serial.print("DAFTAR#");
-          Serial.print(kirim);
-          Serial.print("#");
-          Serial.print(get_long(), 6);
-          Serial.print("#");
-          Serial.println(get_lat(), 6);
-          state = 1;
+            Serial.print(get_lat(), 6);
+            Serial.print(" ");
+            Serial.println(get_long(), 6);
+            Serial.print("DAFTAR#");
+            Serial.print(kirim);
+            Serial.print("#");
+            Serial.print(get_long(), 6);
+            Serial.print("#");
+            Serial.println(get_lat(), 6);
+            state = 1;
           }
         }
       break;
@@ -215,33 +217,44 @@ gpslong = get_long();
       break;
   }
 
-//loop read serial string
+  //loop read serial string
   if (stringComplete) {
     inputString.trim();
-    if (inputString == "FETCH") {
-      state = 1;
-//kirimsekalion = false;
-//kirimsekalioff = false;
+    int index = inputString.indexOf('#');
+    if (index < 0) {
+      token = inputString;
+    }
+    else
+    {
+      token = inputString.substring(0, index);
+    }
+    if (token == "FETCH") {
+      data = inputString.substring(index + 1, inputString.length());
+      int arr_len = inputString.length() + 1;
+      char char_array[arr_len];
+      data.toCharArray(char_array, arr_len);
+      strcpy (pass, char_array);
       Serial.print("DATA#");
       Serial.println(lux);
+      state = 1;
     }
-    if (inputString == "DAFTAR") {
+    if (token == "DAFTAR") {
       Serial.println("CHANGE");
       k = 0;
-kirimsekalion= false;
-kirimsekalioff= false;
       for (int i = 0 ; i < 9; i++)
       {
-        pass[i] =' ';
+        pass[i] = ' ';
       }
       state = 0;
     }
-if(inputString == "CEK"){
-Serial.print("cek#");
-Serial.println(statusPH);
-}
+    if (token == "CEK") {
+      Serial.print("cek#");
+      Serial.println(statusPH);
+    }
     stringComplete = false;
     inputString = "";
+    data = "";
+    token = "";
   }
 
 }
