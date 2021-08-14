@@ -25,3 +25,10 @@ GPS neo7m use software serial on pin 3 (RX) and 2 (TX)
 Keypad on pin
 rowPins[ROWS] = {12, 11, 10, 9}; //connect to the row pinouts of the keypad
 colPins[COLS] = {8, 7, 6}; //connect to the column pinouts of the keypad
+  
+## Pendaftaran Device
+ - `* untuk backspace`
+ - `# untuk yes/next`
+  1. Hidupkan Device
+  2. Input device id (default id = 0000)
+  3. OK (wait for gps get location)
